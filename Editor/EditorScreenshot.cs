@@ -31,6 +31,7 @@ namespace Pumkin.EditorScreenshot
         [SerializeField] Texture2D githubIcon;
         [SerializeField] Texture2D kofiIcon;
         [SerializeField] VisualTreeAsset uxmlTree;
+        [SerializeField] StyleSheet styleSheet;
         VisualElement tree;
 
         Camera TargetCamera
@@ -68,6 +69,7 @@ namespace Pumkin.EditorScreenshot
         [SerializeField] bool _followSceneCamera = false;
         [SerializeField] bool fixNearClip = true;
         [SerializeField] bool useTransparentBg = true;
+        [SerializeField] bool openScreenshotAfterSaving = true;
         [SerializeField] string savePath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
         [SerializeField] Vector2Int resolution = new Vector2Int(1920, 1080);
         [SerializeField] int resolutionMultiplier = 1;
@@ -104,6 +106,7 @@ namespace Pumkin.EditorScreenshot
         void CreateGUI()
         {
             tree = uxmlTree.CloneTree();
+            tree.styleSheets.Add(styleSheet);
             rootVisualElement.Add(tree);
 
             resolutionInfoLabel = tree.Q<Label>("resolutionInfoLabel");
@@ -206,6 +209,10 @@ namespace Pumkin.EditorScreenshot
                 filePathField.value = savePath;
             });
 
+            Toggle openScreenshotToggle = tree.Q<Toggle>("openScreenshotAfterSavingToggle");
+            openScreenshotToggle.value = openScreenshotAfterSaving;
+            openScreenshotToggle.RegisterCallback<ChangeEvent<bool>>(evt => openScreenshotAfterSaving = evt.newValue);
+
             tree.Q("screenshotButton").RegisterCallback<MouseUpEvent>(evt => TakeScreenshot());
             tree.Q("openLastButton").RegisterCallback<MouseUpEvent>(evt => OpenLastScreenshot());
             tree.Q("openFolderButton").RegisterCallback<MouseUpEvent>(evt => OpenSaveFolder());
@@ -273,9 +280,12 @@ namespace Pumkin.EditorScreenshot
 
                 File.WriteAllBytes(screenshotPath, screenShot.EncodeToPNG());
                 lastScreenshotPath = screenshotPath;
-                Application.OpenURL(lastScreenshotPath);
+
                 success = true;
                 logMsg += "<b>Success!</b>";
+
+                if(openScreenshotAfterSaving)
+                    Application.OpenURL(lastScreenshotPath);
             }
             catch(Exception ex)
             {

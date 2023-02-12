@@ -1,5 +1,6 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
     <ui:VisualElement name="root" style="padding-left: 5px; padding-right: 5px; padding-top: 5px; justify-content: flex-start; align-items: stretch; flex-direction: column; margin-bottom: 0; padding-bottom: 0; flex-grow: 0;">
+        <Style src="EditorScreenshotStyle.uss" />
         <ui:VisualElement name="titleContainer" style="margin-right: 3px; margin-top: 1px; margin-bottom: 1px; padding-bottom: 15px; flex-direction: row;">
             <ui:Label text="Pumkin&apos;s Editor Screenshot" name="mainTitle" style="opacity: 1; flex-grow: 0; flex-direction: column; flex-wrap: nowrap; flex-shrink: 0; padding-left: 0; padding-right: 0; padding-top: 0; -unity-text-align: middle-left; color: rgb(255, 0, 162); font-size: 16px; white-space: normal; -unity-font-style: normal;" />
             <ui:Label text="vX.X" name="versionLabel" style="flex-wrap: wrap; flex-grow: 0; flex-basis: auto; flex-shrink: 0; -unity-text-align: middle-right; padding-left: 5px;" />
@@ -12,7 +13,7 @@
             <uie:EnumField label="Camera Type" value="SceneViewCamera" name="cameraTypeEnum" tooltip="Choose between a Game Camera and Scene View Camera." style="margin-left: 0;" />
             <ui:VisualElement name="gameCameraContainer" class="container" style="visibility: visible; opacity: 1;">
                 <ui:VisualElement class="container" style="height: auto; display: flex; visibility: visible; overflow: visible; align-items: stretch; justify-content: flex-end; flex-direction: row; flex-shrink: 0; flex-wrap: nowrap; flex-grow: 0; width: auto; padding-bottom: 0; margin-bottom: 1px; margin-left: 0; margin-right: 3px; margin-top: 1px; padding-top: 0;">
-                    <uie:ObjectField name="gameCameraSelector" label="Camera" tooltip="Game camera to use." style="align-items: flex-start; flex-direction: row; justify-content: flex-start; overflow: hidden; flex-basis: 0; flex-grow: 1; flex-shrink: 0; margin-right: 0; padding-left: 1px; width: 90px; margin-top: 1px; margin-left: 0;" />
+                    <uie:ObjectField name="gameCameraSelector" label="Camera" tooltip="Game camera to use." style="align-items: flex-start; flex-direction: row; justify-content: flex-start; overflow: hidden; flex-basis: 0; flex-grow: 1; flex-shrink: 0; margin-right: 0; padding-left: 1px; width: 90px; margin-top: 1px; margin-left: -1px;" />
                     <ui:Button text="&lt;" tooltip="Selects currently selected camera or Main Camera." name="gameCameraFromSelection" style="position: relative; align-items: center; justify-content: center; white-space: nowrap; right: 0; -unity-text-align: upper-center; width: 20px; padding-left: 1px; padding-right: 1px; margin-left: 3px; margin-right: 0; padding-top: 1px; margin-top: 0;" />
                 </ui:VisualElement>
                 <ui:Toggle label="Follow Scene Camera" name="followSceneCameraToggle" tooltip="Stick the selected camera to the scene view camera." style="margin-left: 0;" />
@@ -42,6 +43,7 @@
                 <ui:TextField picking-mode="Ignore" name="filePathField" tooltip="Path to save screenshots to." style="flex-grow: 1; margin-left: 0; margin-right: 0; width: 90%; flex-shrink: 1;" />
                 <ui:Button text="Browse" name="browseButton" tooltip="Browse for a save folder." style="flex-shrink: 1; margin-right: 0;" />
             </ui:VisualElement>
+            <ui:Toggle label="Open screenshot on save" name="openScreenshotAfterSavingToggle" value="true" style="margin-left: 0;" />
         </ui:VisualElement>
         <ui:VisualElement name="screenshotButtonsContainer" style="padding-top: 40px;">
             <ui:Label text="Resolution label" name="resolutionInfoLabel" style="flex-wrap: wrap; -unity-font-style: bold;" />

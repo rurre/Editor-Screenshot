@@ -9,6 +9,8 @@ MonoImporter:
   - kofiIcon: {fileID: 2800000, guid: 19b9674583d841243b17e12c287d26b6, type: 3}
   - uxmlTree: {fileID: 9197481963319205126, guid: 477b18811be477e4c9df5f040f0fd87e,
       type: 3}
+  - styleSheet: {fileID: 7433441132597879392, guid: bc1315a79a1feef4ab64c77da4368ed8,
+      type: 3}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 
