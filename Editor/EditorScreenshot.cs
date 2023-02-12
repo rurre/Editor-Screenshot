@@ -306,9 +306,9 @@ namespace Pumkin.EditorScreenshot
                     TargetCamera.nearClipPlane = oldNearClip;
             }
             if(success)
-                Debug.Log(logMsg);
+                Debug.Log(FormatLogMessage(logMsg));
             else
-                Debug.LogError(logMsg);
+                Debug.LogError(FormatLogMessage(logMsg));
         }
 
         void OpenSaveFolder()
@@ -333,7 +333,7 @@ namespace Pumkin.EditorScreenshot
 
         string FormatLogMessage(string message)
         {
-            return $"Editor Screenshot: {message}";
+            return $"<b>Editor Screenshot:</b> {message}";
         }
 
         string GenerateScreenshotName()
