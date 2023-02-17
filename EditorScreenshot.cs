@@ -22,16 +22,16 @@ namespace Pumkin.EditorScreenshot
             GameCamera
         };
 
-        readonly Version version = new Version(1, 0);
+        readonly Version version = new Version(1, 0, 1);
         const string defaultScreenshotName = "Screenshot_{0}x{1}.png";
         const string resolutionInfoText = "Final screenshot resolution will be {0}x{1}";
         const string kofiLink = "https://ko-fi.com/notpumkin";
         const string githubLink = "https://github.com/rurre/Editor-Screenshot";
 
-        [SerializeField] Texture2D githubIcon;
-        [SerializeField] Texture2D kofiIcon;
-        [SerializeField] VisualTreeAsset uxmlTree;
-        [SerializeField] StyleSheet styleSheet;
+        Texture2D githubIcon;
+        Texture2D kofiIcon;
+        VisualTreeAsset uxmlTree;
+        StyleSheet styleSheet;
         VisualElement tree;
 
         Camera TargetCamera
@@ -80,10 +80,12 @@ namespace Pumkin.EditorScreenshot
 
         Label resolutionInfoLabel;
 
+		static EditorWindow window;
+
         [MenuItem("Tools/Pumkin/Editor Screenshot", false, 65)]
         public static void ShowWindow()
         {
-            EditorWindow window = GetWindow<EditorScreenshot>();
+            window = GetWindow<EditorScreenshot>();
             window.titleContent = new GUIContent("Screenshot");
             window.minSize = new Vector2(335, 360);
         }
@@ -105,6 +107,9 @@ namespace Pumkin.EditorScreenshot
 
         void CreateGUI()
         {
+            uxmlTree = Resources.Load<VisualTreeAsset>("Pumkin/EditorScreenshot/EditorScreenshot");
+            styleSheet = Resources.Load<StyleSheet>("Pumkin/EditorScreenshot/EditorScreenshot");
+
             tree = uxmlTree.CloneTree();
             tree.styleSheets.Add(styleSheet);
             rootVisualElement.Add(tree);
@@ -217,10 +222,12 @@ namespace Pumkin.EditorScreenshot
             tree.Q("openLastButton").RegisterCallback<MouseUpEvent>(evt => OpenLastScreenshot());
             tree.Q("openFolderButton").RegisterCallback<MouseUpEvent>(evt => OpenSaveFolder());
 
+            kofiIcon = Resources.Load<Texture2D>("Pumkin/EditorScreenshot/logo_kofi");
             VisualElement donateButton = tree.Q("donateButton");
             donateButton.style.backgroundImage = new StyleBackground(kofiIcon);
             donateButton.RegisterCallback<MouseUpEvent>(evt => Application.OpenURL(kofiLink));
 
+            githubIcon = Resources.Load<Texture2D>("Pumkin/EditorScreenshot/logo_github");
             VisualElement githubButton = tree.Q("githubButton");
             githubButton.style.backgroundImage = new StyleBackground(githubIcon);
             githubButton.RegisterCallback<MouseUpEvent>(evt => Application.OpenURL(githubLink));
