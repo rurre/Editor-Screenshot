@@ -1,8 +1,6 @@
-﻿// =================================================================================================
-// EditorScreenshots by Pumkin#9524
+﻿// EditorScreenshots by Pumkin#9524
 // https://github.com/rurre/Editor-Screenshot
 // Based on an ancient tool somewhere on the Asset Store called Instant Screenshot by Saad Khawaja.
-// =================================================================================================
 
 using System;
 using System.IO;
@@ -27,6 +25,7 @@ namespace Pumkin.EditorScreenshot
         const string resolutionInfoText = "Final screenshot resolution will be {0}x{1}";
         const string kofiLink = "https://ko-fi.com/notpumkin";
         const string githubLink = "https://github.com/rurre/Editor-Screenshot";
+        const string editorPrefsSettingsKey = "PumkinsEditorScreenshotSettings";
 
         Texture2D githubIcon;
         Texture2D kofiIcon;
@@ -74,7 +73,7 @@ namespace Pumkin.EditorScreenshot
         [SerializeField] Vector2Int resolution = new Vector2Int(1920, 1080);
         [SerializeField] int resolutionMultiplier = 1;
 
-        ScreenshotCameraType selectedCameraType = ScreenshotCameraType.SceneViewCamera;
+        [SerializeField] ScreenshotCameraType selectedCameraType = ScreenshotCameraType.SceneViewCamera;
         Transform _lastCameraTransform;
         string lastScreenshotPath;
 
@@ -90,9 +89,44 @@ namespace Pumkin.EditorScreenshot
             window.minSize = new Vector2(335, 360);
         }
 
+        void Awake()
+        {
+            LoadSettings();
+        }
+
         void OnDestroy()
         {
             StopFollowingCamera();
+            SaveSettings();
+        }
+
+        void LoadSettings()
+        {
+            try
+            {
+                string json = EditorPrefs.GetString(editorPrefsSettingsKey, null);
+                if(!string.IsNullOrWhiteSpace(json))
+                    JsonUtility.FromJsonOverwrite(json, this);
+            }
+            catch(Exception ex)
+            {
+                Debug.LogWarning(FormatLogMessage("Failed to load window settings:"));
+                Debug.LogException(ex);
+            }
+        }
+
+        void SaveSettings()
+        {
+            try
+            {
+                string json = JsonUtility.ToJson(this);
+                EditorPrefs.SetString(editorPrefsSettingsKey, json);
+            }
+            catch(Exception ex)
+            {
+                Debug.LogError(FormatLogMessage("Failed to save window settings."));
+                Debug.LogException(ex);
+            }
         }
 
         void StartFollowingCamera() => EditorApplication.update += CameraToSceneCamera;
@@ -163,11 +197,21 @@ namespace Pumkin.EditorScreenshot
             followSceneCameraToggle.RegisterCallback<ChangeEvent<bool>>(evt => FollowSceneCamera = evt.newValue);
 
             IntegerField resWidthField = tree.Q<IntegerField>("resWidthField");
+            resWidthField.RegisterCallback<ChangeEvent<int>>(evt =>
+            {
+                resolution.x = evt.newValue;
+                UpdateResolutionInfoLabel();
+
+            });
             resWidthField.value = resolution.x;
-            resWidthField.RegisterCallback<ChangeEvent<IntegerField>>(evt => resolution.x = evt.newValue.value);
 
             IntegerField resHeightField = tree.Q<IntegerField>("resHeightField");
-            resHeightField.RegisterCallback<ChangeEvent<IntegerField>>(evt => resolution.y = evt.newValue.value);
+            resHeightField.RegisterCallback<ChangeEvent<int>>(evt =>
+            {
+                resolution.y = evt.newValue;
+                UpdateResolutionInfoLabel();
+            });
+            resHeightField.value = resolution.y;
 
             IntegerField multiplierInt = tree.Q<IntegerField>("multiplierInt");
             SliderInt multiplierSlider = tree.Q<SliderInt>("multiplierSlider");
