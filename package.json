@@ -1,0 +1,16 @@
+{
+  "name": "com.pumkin.editorscreenshot",
+  "displayName": "Editor Screenshot",
+  "version": "1.0.1",
+  "unity": "2019.4",
+  "description": "An editor tool for taking transparent screenshots in the editor.",
+  "vpmDependencies": {},
+  "url": "https://github.com/rurre/Editor-Screenshot/archive/refs/heads/main.zip",
+  "legacyFolders": {},
+  "legacyFiles": {},
+  "type": "tool",
+  "author": {
+  "name": "Pumkin",  
+  "url": "https://github.com/rurre"
+  }
+}
