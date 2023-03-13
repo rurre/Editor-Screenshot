@@ -7,6 +7,6 @@ Mainly made this to take transparent screenshots for use with making VRChat thum
 Open it by going up to `Tools > Pumkin > Editor Screenshot`
 
 ## How to install
-Go to (Releases)[https://github.com/rurre/Editor-Screenshot/releases] and grab the latest .unitypackage, then just import it into your project.
+Go to [Releases](https://github.com/rurre/Editor-Screenshot/releases) and grab the latest .unitypackage, then just import it into your project.
 
-Alternatively, clone the repot and put it into your project's Packages folder.
+Alternatively, clone the repo and put it into your project's Packages folder.
