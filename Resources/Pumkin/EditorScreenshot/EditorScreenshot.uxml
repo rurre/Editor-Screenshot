@@ -11,6 +11,13 @@
         </ui:VisualElement>
         <ui:VisualElement name="camerasContainer" class="container">
             <uie:EnumField label="Camera Type" value="SceneViewCamera" name="cameraTypeEnum" tooltip="Choose between a Game Camera and Scene View Camera." style="margin-left: 0;" />
+            <ui:VisualElement name="sceneCameraContainer" class="container">
+                <ui:VisualElement class="container" style="align-items: stretch; margin-right: 3px; margin-top: 1px; margin-bottom: 1px; padding-left: 0; padding-right: 0; padding-bottom: 0; flex-direction: row;">
+                    <ui:VisualElement class="unity-base-field__label" style="margin-right: 0; margin-top: 1px; margin-bottom: 1px;" />
+                    <ui:Button text="New Camera from Scene View" name="cameraFromSceneButton" tooltip="Creates a new Camera based on the scene camera" style="margin-left: 0; margin-right: 0; width: auto; flex-shrink: 1; flex-grow: 1; margin-top: 0; margin-bottom: 0;" />
+                </ui:VisualElement>
+                <ui:Toggle label="Select Created Camera" name="selectCreatedCameraToggle" tooltip="Select the newly created Camera from Scene View." value="true" style="margin-left: 0;" />
+            </ui:VisualElement>
             <ui:VisualElement name="gameCameraContainer" class="container" style="visibility: visible; opacity: 1;">
                 <ui:VisualElement class="container" style="height: auto; display: flex; visibility: visible; overflow: visible; align-items: stretch; justify-content: flex-end; flex-direction: row; flex-shrink: 0; flex-wrap: nowrap; flex-grow: 0; width: auto; padding-bottom: 0; margin-bottom: 1px; margin-left: 0; margin-right: 3px; margin-top: 1px; padding-top: 0;">
                     <uie:ObjectField name="gameCameraSelector" label="Camera" tooltip="Game camera to use." style="align-items: flex-start; flex-direction: row; justify-content: flex-start; overflow: hidden; flex-basis: 0; flex-grow: 1; flex-shrink: 0; margin-right: 0; padding-left: 1px; width: 90px; margin-top: 1px; margin-left: -1px;" />

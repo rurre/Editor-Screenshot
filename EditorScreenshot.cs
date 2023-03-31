@@ -6,6 +6,7 @@ using System;
 using System.IO;
 using UnityEditor;
 using UnityEditor.UIElements;
+using UnityEditorInternal;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -20,7 +21,7 @@ namespace Pumkin.EditorScreenshot
             GameCamera
         };
 
-        readonly Version version = new Version(1, 0, 1);
+        readonly Version version = new Version(1, 1, 0);
         const string defaultScreenshotName = "Screenshot_{0}x{1}.png";
         const string resolutionInfoText = "Final screenshot resolution will be {0}x{1}";
         const string kofiLink = "https://ko-fi.com/notpumkin";
@@ -77,7 +78,11 @@ namespace Pumkin.EditorScreenshot
         Transform _lastCameraTransform;
         string lastScreenshotPath;
 
+        [SerializeField] bool selectCreatedCamera = false;
+
         Label resolutionInfoLabel;
+        ObjectField selectedCameraField;
+        EnumField cameraTypeEnumField;
 
 		static EditorWindow window;
 
@@ -154,12 +159,22 @@ namespace Pumkin.EditorScreenshot
             VisualElement gameCameraContainer = tree.Query<VisualElement>("gameCameraContainer");
             gameCameraContainer.style.display = DisplayStyle.None;
 
-            EnumField camTypeEnum = tree.Query<EnumField>("cameraTypeEnum");
-            camTypeEnum.Init(ScreenshotCameraType.SceneViewCamera);
-            camTypeEnum.RegisterCallback<ChangeEvent<Enum>>(evt =>
+            VisualElement sceneCameraContainer = tree.Query<VisualElement>("sceneCameraContainer");
+            sceneCameraContainer.style.display = DisplayStyle.Flex;
+
+            Toggle selectCreatedCameraToggle = tree.Q<Toggle>("selectCreatedCameraToggle");
+            selectCreatedCameraToggle.RegisterCallback<ChangeEvent<bool>>(evt => selectCreatedCamera = evt.newValue);
+            selectCreatedCameraToggle.value = selectCreatedCamera;
+
+            tree.Q("cameraFromSceneButton").RegisterCallback<MouseUpEvent>(evt => CreateCameraFromSceneView());
+
+            cameraTypeEnumField = tree.Query<EnumField>("cameraTypeEnum");
+            cameraTypeEnumField.Init(ScreenshotCameraType.SceneViewCamera);
+            cameraTypeEnumField.RegisterCallback<ChangeEvent<Enum>>(evt =>
             {
                 selectedCameraType = (ScreenshotCameraType)evt.newValue;
                 gameCameraContainer.style.display = selectedCameraType == ScreenshotCameraType.GameCamera ? DisplayStyle.Flex : DisplayStyle.None;
+                sceneCameraContainer.style.display = selectedCameraType == ScreenshotCameraType.SceneViewCamera ? DisplayStyle.Flex : DisplayStyle.None;
 
                 if(FollowSceneCamera)
                 {
@@ -169,9 +184,9 @@ namespace Pumkin.EditorScreenshot
                         FollowSceneCamera = FollowSceneCamera;
                 }
             });
-            camTypeEnum.value = selectedCameraType;
+            cameraTypeEnumField.value = selectedCameraType;
 
-            ObjectField selectedCameraField = tree.Q<ObjectField>("gameCameraSelector");
+            selectedCameraField = tree.Q<ObjectField>("gameCameraSelector");
             selectedCameraField.allowSceneObjects = true;
             selectedCameraField.objectType = typeof(Camera);
             selectedCameraField.RegisterCallback<ChangeEvent<UnityEngine.Object>>(evt =>
@@ -277,6 +292,32 @@ namespace Pumkin.EditorScreenshot
             githubButton.RegisterCallback<MouseUpEvent>(evt => Application.OpenURL(githubLink));
 
             UpdateResolutionInfoLabel();
+        }
+
+        void CreateCameraFromSceneView()
+        {
+            if(!SceneView.lastActiveSceneView && !SceneView.lastActiveSceneView.camera)
+            {
+                Debug.LogError(FormatLogMessage("Failed to create camera from scene view."));
+                return;
+            }
+
+            var sceneCam = SceneView.lastActiveSceneView.camera;
+
+            var camObj = new GameObject("Camera");
+            camObj.transform.SetPositionAndRotation(sceneCam.transform.position, sceneCam.transform.rotation);
+            ComponentUtility.CopyComponent(SceneView.lastActiveSceneView.camera);
+            ComponentUtility.PasteComponentAsNew(camObj);
+
+            var cam = camObj.GetComponent<Camera>();
+            cam.enabled = true;
+            cam.targetTexture = null;
+
+            if(selectCreatedCamera)
+            {
+                cameraTypeEnumField.value = ScreenshotCameraType.GameCamera;
+                selectedCameraField.value = camObj.GetComponent<Camera>();
+            }
         }
 
         void UpdateResolutionInfoLabel()
