@@ -1,4 +1,4 @@
-﻿// EditorScreenshots by Pumkin#9524
+// EditorScreenshots by Pumkin#9524
 // https://github.com/rurre/Editor-Screenshot
 // Based on an ancient tool somewhere on the Asset Store called Instant Screenshot by Saad Khawaja.
 
@@ -21,7 +21,7 @@ namespace Pumkin.EditorScreenshot
             GameCamera
         };
 
-        readonly Version version = new Version(1, 1, 0);
+        readonly Version version = new Version(1, 1, 1);
         const string defaultScreenshotName = "Screenshot_{0}x{1}.png";
         const string resolutionInfoText = "Final screenshot resolution will be {0}x{1}";
         const string kofiLink = "https://ko-fi.com/notpumkin";
@@ -369,6 +369,9 @@ namespace Pumkin.EditorScreenshot
                 screenShot.ReadPixels(new Rect(0, 0, resWidth, resHeight), 0, 0);
                 cam.targetTexture = null;
                 RenderTexture.active = null;
+
+                if(!Directory.Exists(savePath))
+                    Directory.CreateDirectory(savePath);
 
                 File.WriteAllBytes(screenshotPath, screenShot.EncodeToPNG());
                 lastScreenshotPath = screenshotPath;
