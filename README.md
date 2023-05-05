@@ -2,7 +2,9 @@
 A unity editor script for taking screenshots in the editor.
 Mainly made this to take transparent screenshots for use with making VRChat thumbnails.
 
-![2023-03-07_00-02-51](https://user-images.githubusercontent.com/16716633/223245452-c5a910a3-aa7c-4e8d-ba52-43b778269790.png)
+
+https://user-images.githubusercontent.com/16716633/236457844-f77327f0-2442-4fb1-ae8e-ac5e3880e73a.mp4
+
 
 Open it by going up to `Tools > Pumkin > Editor Screenshot`
 
