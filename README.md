@@ -12,12 +12,8 @@ Open it by going up to `Tools > Pumkin > Editor Screenshot`
 
 You can either install using VCC or by importing a unity package.
 
-### Using a Unity Package
-Go to [Releases](https://github.com/rurre/Editor-Screenshot/releases) and grab the latest .unitypackage, then just import it into your project.
-
 ### Using VRChat Creator Companion
-Grab the repository and unzip it somewhere.
+Go to my [VCC Package Listing](https://rurre.github.io/vpm/) and click `Add to VCC`. For more info check the Readme link on the site or [here](https://github.com/rurre/vpm#readme).
 
-![image](https://user-images.githubusercontent.com/16716633/224586944-9ac4bb78-7584-4b7f-b5e2-18ce3fd7b238.png)
-
-In VCC Settings > Packages add the folder you just unzipped. Now you can add it to your projects.
+### Using a Unity Package
+Go to [Releases](https://github.com/rurre/Editor-Screenshot/releases) and import the latest .unitypackage into your project as you normally would any other p.
