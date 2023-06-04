@@ -16,4 +16,4 @@ You can either install using VCC or by importing a unity package.
 Go to my [VCC Package Listing](https://rurre.github.io/vpm/) and click `Add to VCC`. For more info check the Readme link on the site or [here](https://github.com/rurre/vpm#readme).
 
 ### Using a Unity Package
-Go to [Releases](https://github.com/rurre/Editor-Screenshot/releases) and import the latest .unitypackage into your project as you normally would any other p.
+Go to [Releases](https://github.com/rurre/Editor-Screenshot/releases) and import the latest .unitypackage into your project as you normally would any other package.
