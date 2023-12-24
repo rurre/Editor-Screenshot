@@ -21,7 +21,7 @@ namespace Pumkin.EditorScreenshot
             GameCamera
         };
 
-        readonly Version version = new Version(1, 1, 1);
+        string version = "Unknown";
         const string defaultScreenshotName = "Screenshot_{0}x{1}.png";
         const string resolutionInfoText = "Final screenshot resolution will be {0}x{1}";
         const string kofiLink = "https://ko-fi.com/notpumkin";
@@ -86,6 +86,20 @@ namespace Pumkin.EditorScreenshot
 
 		static EditorWindow window;
 
+        string ProjectPath
+        {
+            get
+            {
+                if(string.IsNullOrWhiteSpace(_projectPath))
+                {
+                    string dataPath = Application.dataPath;
+                    _projectPath = dataPath.Substring(0, dataPath.LastIndexOf("Assets"));
+                }
+                return _projectPath;
+            }
+        }
+        string _projectPath;
+
         [MenuItem("Tools/Pumkin/Editor Screenshot", false, 65)]
         public static void ShowWindow()
         {
@@ -105,6 +119,11 @@ namespace Pumkin.EditorScreenshot
             SaveSettings();
         }
 
+        class PackageJson
+        {
+            public string version;
+        }
+
         void LoadSettings()
         {
             try
@@ -117,6 +136,16 @@ namespace Pumkin.EditorScreenshot
             {
                 Debug.LogWarning(FormatLogMessage("Failed to load window settings:"));
                 Debug.LogException(ex);
+            }
+
+            // Get version from package.json
+            string packagePath = $"{ProjectPath}Packages/io.github.rurre.editor-screenshot/package.json";
+            if(File.Exists(packagePath))
+            {
+                string json = File.ReadAllText(packagePath);
+                var jsonInstance = JsonUtility.FromJson<PackageJson>(json);
+                if(jsonInstance != null)
+                    version = jsonInstance.version;
             }
         }
 
