@@ -1,14 +1,14 @@
 {
   "name": "io.github.rurre.editor-screenshot",
   "displayName": "Editor Screenshot",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "An editor tool for taking transparent screenshots in the editor.",
   "url": "https://github.com/rurre/Editor-Screenshot/",
   "unity": "2019.4",
   "author": {
-    "name": "Pumkin"    
+    "name": "Pumkin"
   },
-  "vpmDependencies": {},  
+  "vpmDependencies": {},
   "legacyFolders": {},
   "legacyFiles": {},
   "type": "tool",
@@ -19,5 +19,5 @@
   "hideInEditor": false,
   "license": "MIT",
   "unity": "2019.4",
-  "type": "tool"  
+  "type": "tool"
 }
