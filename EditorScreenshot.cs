@@ -351,8 +351,8 @@ namespace Pumkin.EditorScreenshot
             try
             {
                 Camera cam = TargetCamera;
-                RenderTexture rt = new RenderTexture(resWidth, resHeight, 24);
-                cam.targetTexture = rt;
+                RenderTexture rtHDR = new RenderTexture(resWidth, resHeight, 24, UnityEngine.Experimental.Rendering.DefaultFormat.HDR);
+                cam.targetTexture = rtHDR;
 
                 if(useTransparentBg)
                 {
@@ -363,10 +363,15 @@ namespace Pumkin.EditorScreenshot
                 if(fixNearClip)
                     cam.nearClipPlane = 0.001f;
 
-                Texture2D screenShot = new Texture2D(resWidth, resHeight, useTransparentBg ? TextureFormat.ARGB32 : TextureFormat.RGB24, false);
                 cam.Render();
-                RenderTexture.active = rt;
+
+                RenderTexture rtLDR = new RenderTexture(resWidth, resHeight, 24, UnityEngine.Experimental.Rendering.DefaultFormat.LDR);
+                Graphics.Blit(rtHDR, rtLDR);
+                RenderTexture.active = rtLDR;
+
+                Texture2D screenShot = new Texture2D(resWidth, resHeight, useTransparentBg ? TextureFormat.ARGB32 : TextureFormat.RGB24, false);
                 screenShot.ReadPixels(new Rect(0, 0, resWidth, resHeight), 0, 0);
+
                 cam.targetTexture = null;
                 RenderTexture.active = null;
 
