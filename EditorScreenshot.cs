@@ -263,7 +263,7 @@ namespace Pumkin.EditorScreenshot
 
             // Add preset Vector2Ints for each Resolution Preset
             List<Vector2Int> presetResolutions = new List<Vector2Int>() {
-                new Vector2Int(1200, 900), // VRC Preview Thumbnail
+                new Vector2Int(1200, 900), // VRC Avatar and World Thumbnail
                 new Vector2Int(720, 480), // 480p SD
                 new Vector2Int(1280, 720), // 720p HD
                 new Vector2Int(1920, 1080), // 1080p FHD
@@ -275,7 +275,7 @@ namespace Pumkin.EditorScreenshot
 
             // Replace Labels on the UI to these Strings (MUST MATCH EXACT ORDER AS ABOVE!!)
             List<string> presetLabels = new List<string>() {
-                "VRC Preview Thumbnail",
+                "VRC Thumbnail",
                 "480p",
                 "720p",
                 "1080p",
