@@ -273,7 +273,7 @@ namespace Pumkin.EditorScreenshot
                 new Vector2Int(-1, -1) // This is a Custom Resolution
             };
 
-            // Replace Labels on the UI to these Strings (MUST MATCH EXACT ORDER AS ABOVE!!)
+            // Fix and replace UI Label Text from showing as Vector2Ints in the Presets Dropdown (MUST MATCH EXACT ORDER AS ABOVE!!)
             List<string> presetLabels = new List<string>() {
                 "VRC Thumbnail",
                 "480p",
@@ -285,10 +285,10 @@ namespace Pumkin.EditorScreenshot
                 "Custom"
             };
             
-            // Create VisualElement for the Preset Dropdown
+            // Create VisualElement for the Presets Dropdown
             VisualElement resolutionContainer = tree.Q<VisualElement>("resolutionContainer");
 
-            // Create PopupField
+            // Create Presets Dropdown
             PopupField<Vector2Int> resolutionDropdown = new PopupField<Vector2Int>("Presets", presetResolutions, 0,
             formatListItemCallback: (Vector2Int res) => {
                 int index = presetResolutions.IndexOf(res);
@@ -299,7 +299,7 @@ namespace Pumkin.EditorScreenshot
                 return index >= 0 ? presetLabels[index] : "Custom";
             });
             
-            // Add change listeners to the Integer Fields
+            // Add listeners to ensure "Custom" is auto-selected when Resolution is manually typed in
             resWidthField.RegisterValueChangedCallback(evt => {
                 if (!presetResolutions.Any(res => res.x == evt.newValue && res.y == resHeightField.value)) {
                     resolutionDropdown.value = new Vector2Int(-1, -1); // Set to Custom
@@ -311,7 +311,7 @@ namespace Pumkin.EditorScreenshot
                 }
             });
             
-            // Dropdown Change Event Handler
+            // Presets Dropdown Event Handler
             resolutionDropdown.RegisterValueChangedCallback(evt => {
                 if (evt.newValue.x == -1 && evt.newValue.y == -1) {
                     return; // Don't update the Integer Fields if "Custom" is selected
