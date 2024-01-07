@@ -1,32 +1,32 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="True">
+    <Style src="project://database/Packages/io.github.rurre.editor-screenshot/Resources/Pumkin/EditorScreenshot/EditorScreenshotStyle.uss?fileID=7433441132597879392&amp;guid=bc1315a79a1feef4ab64c77da4368ed8&amp;type=3#EditorScreenshotStyle" />
     <ui:VisualElement name="root" style="padding-left: 5px; padding-right: 5px; padding-top: 5px; justify-content: flex-start; align-items: stretch; flex-direction: column; margin-bottom: 0; padding-bottom: 0; flex-grow: 0;">
-        <Style src="EditorScreenshotStyle.uss" />
-        <ui:VisualElement name="titleContainer" style="margin-right: 3px; margin-top: 1px; margin-bottom: 1px; padding-bottom: 15px; flex-direction: row;">
+        <ui:VisualElement name="titleContainer" class="section" style="margin-right: 3px; margin-top: 1px; margin-bottom: 1px; padding-bottom: 15px; flex-direction: row;">
             <ui:Label text="Pumkin&apos;s Editor Screenshot" name="mainTitle" style="opacity: 1; flex-grow: 0; flex-direction: column; flex-wrap: nowrap; flex-shrink: 0; padding-left: 0; padding-right: 0; padding-top: 0; -unity-text-align: middle-left; color: rgb(255, 0, 162); font-size: 16px; white-space: normal; -unity-font-style: normal;" />
             <ui:Label text="vX.X" name="versionLabel" style="flex-wrap: wrap; flex-grow: 0; flex-basis: auto; flex-shrink: 0; -unity-text-align: middle-right; padding-left: 5px;" />
             <ui:VisualElement name="buttonLinks" style="width: auto; height: auto; flex-direction: row-reverse; flex-grow: 1;">
-                <ui:VisualElement name="donateButton" tooltip="Show support by giving me money! &lt;3" style="width: 25px; height: 25px; margin-right: 3px; margin-left: 3px; -unity-background-image-tint-color: rgba(0, 0, 0, 0); background-color: rgba(0, 0, 0, 0);" />
-                <ui:VisualElement name="githubButton" tooltip="Open the Github page for this tool." style="width: 25px; height: 25px; padding-right: 0; margin-right: 3px; margin-left: 3px; -unity-background-scale-mode: stretch-to-fill; -unity-background-image-tint-color: rgb(255, 255, 255);" />
+                <ui:VisualElement name="donateButton" tooltip="Show support by giving me money! &lt;3" class="linkButton" />
+                <ui:VisualElement name="githubButton" tooltip="Open the Github page for this tool." class="linkButton" />
             </ui:VisualElement>
         </ui:VisualElement>
-        <ui:VisualElement name="camerasContainer" class="container">
+        <ui:VisualElement name="camerasContainer" class="container section">
             <uie:EnumField label="Camera Type" value="SceneViewCamera" name="cameraTypeEnum" tooltip="Choose between a Game Camera and Scene View Camera." style="margin-left: 0;" />
             <ui:VisualElement name="sceneCameraContainer" class="container">
                 <ui:VisualElement class="container" style="align-items: stretch; margin-right: 3px; margin-top: 1px; margin-bottom: 1px; padding-left: 0; padding-right: 0; padding-bottom: 0; flex-direction: row;">
-                    <ui:VisualElement class="unity-base-field__label" style="margin-right: 0; margin-top: 1px; margin-bottom: 1px;" />
+                    <ui:VisualElement class="unity-base-field__label" style="margin-right: 2px; margin-top: 1px; margin-bottom: 1px;" />
                     <ui:Button text="New Camera from Scene View" name="cameraFromSceneButton" tooltip="Creates a new Camera based on the scene camera" style="margin-left: 0; margin-right: 0; width: auto; flex-shrink: 1; flex-grow: 1; margin-top: 0; margin-bottom: 0;" />
                 </ui:VisualElement>
                 <ui:Toggle label="Select Created Camera" name="selectCreatedCameraToggle" tooltip="Select the newly created Camera from Scene View." value="true" style="margin-left: 0;" />
             </ui:VisualElement>
             <ui:VisualElement name="gameCameraContainer" class="container" style="visibility: visible; opacity: 1;">
                 <ui:VisualElement class="container" style="height: auto; display: flex; visibility: visible; overflow: visible; align-items: stretch; justify-content: flex-end; flex-direction: row; flex-shrink: 0; flex-wrap: nowrap; flex-grow: 0; width: auto; padding-bottom: 0; margin-bottom: 1px; margin-left: 0; margin-right: 3px; margin-top: 1px; padding-top: 0;">
-                    <uie:ObjectField name="gameCameraSelector" label="Camera" tooltip="Game camera to use." style="align-items: flex-start; flex-direction: row; justify-content: flex-start; overflow: hidden; flex-basis: 0; flex-grow: 1; flex-shrink: 0; margin-right: 0; padding-left: 1px; width: 90px; margin-top: 1px; margin-left: -1px;" />
+                    <uie:ObjectField name="gameCameraSelector" label="Camera" tooltip="Game camera to use." type="UnityEngine.Camera, UnityEngine.CoreModule" style="align-items: flex-start; flex-direction: row; justify-content: flex-start; overflow: hidden; flex-basis: 0; flex-grow: 1; flex-shrink: 0; margin-right: 0; padding-left: 1px; width: 90px; margin-top: 1px; margin-left: -1px;" />
                     <ui:Button text="&lt;" tooltip="Selects currently selected camera or Main Camera." name="gameCameraFromSelection" style="position: relative; align-items: center; justify-content: center; white-space: nowrap; right: 0; -unity-text-align: upper-center; width: 20px; padding-left: 1px; padding-right: 1px; margin-left: 3px; margin-right: 0; padding-top: 1px; margin-top: 0;" />
                 </ui:VisualElement>
                 <ui:Toggle label="Follow Scene Camera" name="followSceneCameraToggle" tooltip="Stick the selected camera to the scene view camera." style="margin-left: 0;" />
             </ui:VisualElement>
         </ui:VisualElement>
-        <ui:VisualElement name="resolutionContainer" class="container">
+        <ui:VisualElement name="resolutionContainer" class="container section">
             <ui:VisualElement name="resolutionFieldContainer" style="margin-top: 1px; flex-direction: row; margin-left: 0; margin-right: 3px; margin-bottom: 1px;">
                 <ui:Label text="Resolution" class="unity-base-field__label" />
                 <ui:VisualElement class="unity_base_field__input" style="flex-direction: row; flex-grow: 1; flex-shrink: 0; white-space: normal;">
@@ -40,20 +40,22 @@
                 <uie:IntegerField value="1" name="multiplierInt" tooltip="Resolution multiplier." style="width: 22px; -unity-text-align: upper-center; -unity-font-style: normal; margin-right: 0;" />
             </ui:VisualElement>
         </ui:VisualElement>
-        <ui:VisualElement name="optionsContainer" class="container">
+        <ui:VisualElement name="optionsContainer" class="container section">
             <ui:Toggle label="Transparent Background" name="transparentBackgroundToggle" tooltip="Give screenshots a transparent background." value="true" style="margin-left: 0;" />
             <ui:Toggle label="Fix Near Clip Plane" name="fixNearClipToggle" tooltip="Prevent the camera from clipping when too close something by setting near clip to 0.001." value="true" style="margin-left: 0;" />
         </ui:VisualElement>
-        <ui:VisualElement name="savePathContainer" class="container">
-            <ui:Label text="Save Path" style="width: 35%; -unity-text-align: middle-left; flex-shrink: 1; flex-grow: 0; padding-bottom: 0;" />
-            <ui:VisualElement style="flex-grow: 0; bottom: auto; flex-direction: row; margin-top: 1px; margin-left: 0; margin-right: 3px; margin-bottom: 1px; padding-top: 0; padding-bottom: 0; flex-shrink: 1;">
-                <ui:TextField picking-mode="Ignore" name="filePathField" tooltip="Path to save screenshots to." style="flex-grow: 1; margin-left: 0; margin-right: 0; width: 90%; flex-shrink: 1;" />
-                <ui:Button text="Browse" name="browseButton" tooltip="Browse for a save folder." style="flex-shrink: 1; margin-right: 0;" />
+        <ui:VisualElement name="savePathContainer" class="container section">
+            <ui:VisualElement style="flex-grow: 1;">
+                <ui:Label text="Save Path" style="width: 35%; -unity-text-align: middle-left; flex-shrink: 1; flex-grow: 0; padding-bottom: 0;" />
+                <ui:VisualElement style="flex-grow: 0; bottom: auto; flex-direction: row; margin-top: 1px; margin-left: 0; margin-right: 3px; margin-bottom: 1px; padding-top: 0; padding-bottom: 0; flex-shrink: 1;">
+                    <ui:TextField picking-mode="Ignore" name="filePathField" tooltip="Path to save screenshots to." style="flex-grow: 1; margin-left: 0; margin-right: 0; width: 90%; flex-shrink: 1;" />
+                    <ui:Button text="Browse" name="browseButton" tooltip="Browse for a save folder." style="flex-shrink: 1; margin-right: 0; width: 60px; flex-grow: 1;" />
+                </ui:VisualElement>
+                <ui:Toggle label="Open screenshot on save" name="openScreenshotAfterSavingToggle" value="true" style="margin-left: 0;" />
             </ui:VisualElement>
-            <ui:Toggle label="Open screenshot on save" name="openScreenshotAfterSavingToggle" value="true" style="margin-left: 0;" />
         </ui:VisualElement>
-        <ui:VisualElement name="screenshotButtonsContainer" style="padding-top: 40px;">
-            <ui:Label text="Resolution label" name="resolutionInfoLabel" style="flex-wrap: wrap; -unity-font-style: bold;" />
+        <ui:VisualElement name="screenshotButtonsContainer" class="section">
+            <ui:Label text="Resolution label" name="resolutionInfoLabel" style="flex-wrap: wrap; -unity-font-style: bold; -unity-text-align: upper-center;" />
             <ui:Button text="Take Screenshot" name="screenshotButton" tooltip="Take a screenshot!" style="height: 45px; margin-left: 0; margin-right: 0;" />
             <ui:VisualElement style="flex-direction: row; align-items: center; justify-content: center; flex-grow: 1; height: auto;">
                 <ui:Button text="Open Last Screenshot" name="openLastButton" tooltip="Opens the last screenshot taken this session." style="flex-grow: 1; height: 30px; width: 45%; margin-right: 1px; margin-left: 0;" />
