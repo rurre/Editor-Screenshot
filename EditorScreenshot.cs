@@ -11,6 +11,7 @@ using UnityEditor.UIElements;
 using UnityEditorInternal;
 using UnityEngine;
 using UnityEngine.UIElements;
+using static Pumkin.EditorScreenshot.EditorScreenshotUtility;
 
 namespace Pumkin.EditorScreenshot
 {
@@ -112,7 +113,7 @@ namespace Pumkin.EditorScreenshot
 
         void Awake()
         {
-            LoadSettings();
+			LoadSettings();
         }
 
         void OnDestroy()
@@ -128,7 +129,7 @@ namespace Pumkin.EditorScreenshot
 
         void LoadSettings()
         {
-            try
+			try
             {
                 string json = EditorPrefs.GetString(editorPrefsSettingsKey, null);
                 if(!string.IsNullOrWhiteSpace(json))
@@ -165,7 +166,7 @@ namespace Pumkin.EditorScreenshot
             }
         }
 
-        void StartFollowingCamera() => EditorApplication.update += CameraToSceneCamera;
+		void StartFollowingCamera() => EditorApplication.update += CameraToSceneCamera;
         void StopFollowingCamera() => EditorApplication.update -= CameraToSceneCamera;
 
         void CameraToSceneCamera()
@@ -239,8 +240,8 @@ namespace Pumkin.EditorScreenshot
             });
 
             Toggle followSceneCameraToggle = tree.Q<Toggle>("followSceneCameraToggle");
-            followSceneCameraToggle.value = FollowSceneCamera;
             followSceneCameraToggle.RegisterCallback<ChangeEvent<bool>>(evt => FollowSceneCamera = evt.newValue);
+            followSceneCameraToggle.value = FollowSceneCamera;
 
             IntegerField resWidthField = tree.Q<IntegerField>("resWidthField");
             resWidthField.RegisterCallback<ChangeEvent<int>>(evt =>
@@ -356,9 +357,11 @@ namespace Pumkin.EditorScreenshot
 
             Toggle transparentBackgroundToggle = tree.Q<Toggle>("transparentBackgroundToggle");
             transparentBackgroundToggle.RegisterCallback<ChangeEvent<bool>>(evt => useTransparentBg = evt.newValue);
+			transparentBackgroundToggle.value = useTransparentBg;
 
             Toggle fixNearClipToggle = tree.Q<Toggle>("fixNearClipToggle");
             fixNearClipToggle.RegisterCallback<ChangeEvent<bool>>(evt => fixNearClip = evt.newValue);
+			fixNearClipToggle.value = fixNearClip;
 
             TextField filePathField = tree.Q<TextField>("filePathField");
             filePathField.RegisterCallback<ChangeEvent<string>>(evt =>
@@ -375,8 +378,8 @@ namespace Pumkin.EditorScreenshot
             });
 
             Toggle openScreenshotToggle = tree.Q<Toggle>("openScreenshotAfterSavingToggle");
-            openScreenshotToggle.value = openScreenshotAfterSaving;
             openScreenshotToggle.RegisterCallback<ChangeEvent<bool>>(evt => openScreenshotAfterSaving = evt.newValue);
+            openScreenshotToggle.value = openScreenshotAfterSaving;
 
             tree.Q("screenshotButton").RegisterCallback<MouseUpEvent>(evt => TakeScreenshot());
             tree.Q("openLastButton").RegisterCallback<MouseUpEvent>(evt => OpenLastScreenshot());
@@ -532,32 +535,10 @@ namespace Pumkin.EditorScreenshot
                 Debug.LogWarning(FormatLogMessage("Screenshot doesn't exist at path: " + lastScreenshotPath));
         }
 
-        string FormatLogMessage(string message)
-        {
-            return $"<b>Editor Screenshot:</b> {message}";
-        }
-
         string GenerateScreenshotName()
         {
             string fileName = string.Format(defaultScreenshotName, resolution.x * resolutionMultiplier, resolution.y * resolutionMultiplier);
             return GetUniqueFileName(fileName, savePath);
-        }
-
-        string GetUniqueFileName(string fileName, string folderPath)
-        {
-            string pathAndFileName = Path.Combine(folderPath, fileName);
-            string validatedName = fileName;
-            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(pathAndFileName);
-            string ext = Path.GetExtension(pathAndFileName);
-            int count = 1;
-            while(File.Exists(Path.Combine(folderPath, validatedName)))
-            {
-                validatedName = string.Format("{0}_{1}{2}",
-                    fileNameWithoutExt,
-                    count++,
-                    ext);
-            }
-            return validatedName;
-        }
-    }
+		}
+	}
 }

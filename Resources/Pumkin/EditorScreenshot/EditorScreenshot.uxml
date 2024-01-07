@@ -16,14 +16,14 @@
                     <ui:VisualElement class="unity-base-field__label" style="margin-right: 2px; margin-top: 1px; margin-bottom: 1px;" />
                     <ui:Button text="New Camera from Scene View" name="cameraFromSceneButton" tooltip="Creates a new Camera based on the scene camera" style="margin-left: 0; margin-right: 0; width: auto; flex-shrink: 1; flex-grow: 1; margin-top: 0; margin-bottom: 0;" />
                 </ui:VisualElement>
-                <ui:Toggle label="Select Created Camera" name="selectCreatedCameraToggle" tooltip="Select the newly created Camera from Scene View." value="true" style="margin-left: 0;" />
+                <ui:Toggle label="Select New Camera" name="selectCreatedCameraToggle" tooltip="Select the newly created Camera from Scene View." value="true" style="margin-left: 0;" />
             </ui:VisualElement>
             <ui:VisualElement name="gameCameraContainer" class="container" style="visibility: visible; opacity: 1;">
                 <ui:VisualElement class="container" style="height: auto; display: flex; visibility: visible; overflow: visible; align-items: stretch; justify-content: flex-end; flex-direction: row; flex-shrink: 0; flex-wrap: nowrap; flex-grow: 0; width: auto; padding-bottom: 0; margin-bottom: 1px; margin-left: 0; margin-right: 3px; margin-top: 1px; padding-top: 0;">
                     <uie:ObjectField name="gameCameraSelector" label="Camera" tooltip="Game camera to use." type="UnityEngine.Camera, UnityEngine.CoreModule" style="align-items: flex-start; flex-direction: row; justify-content: flex-start; overflow: hidden; flex-basis: 0; flex-grow: 1; flex-shrink: 0; margin-right: 0; padding-left: 1px; width: 90px; margin-top: 1px; margin-left: -1px;" />
                     <ui:Button text="&lt;" tooltip="Selects currently selected camera or Main Camera." name="gameCameraFromSelection" style="position: relative; align-items: center; justify-content: center; white-space: nowrap; right: 0; -unity-text-align: upper-center; width: 20px; padding-left: 1px; padding-right: 1px; margin-left: 3px; margin-right: 0; padding-top: 1px; margin-top: 0;" />
                 </ui:VisualElement>
-                <ui:Toggle label="Follow Scene Camera" name="followSceneCameraToggle" tooltip="Stick the selected camera to the scene view camera." style="margin-left: 0;" />
+                <ui:Toggle label="Follow Scene" name="followSceneCameraToggle" tooltip="Stick the selected camera to the scene view camera." style="margin-left: 0;" />
             </ui:VisualElement>
         </ui:VisualElement>
         <ui:VisualElement name="resolutionContainer" class="container section">
