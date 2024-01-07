@@ -3,7 +3,9 @@
 // Based on an ancient tool somewhere on the Asset Store called Instant Screenshot by Saad Khawaja.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEditorInternal;
@@ -256,6 +258,74 @@ namespace Pumkin.EditorScreenshot
                 UpdateResolutionInfoLabel();
             });
             resHeightField.value = resolution.y;
+
+            // BEGIN Resolution Presets Dropdown
+
+            // Add preset Vector2Ints for each Resolution Preset
+            List<Vector2Int> presetResolutions = new List<Vector2Int>() {
+                new Vector2Int(1200, 900), // VRC Avatar and World Thumbnail
+                new Vector2Int(720, 480), // 480p SD
+                new Vector2Int(1280, 720), // 720p HD
+                new Vector2Int(1920, 1080), // 1080p FHD
+                new Vector2Int(2560, 1440), // 1440p QHD
+                new Vector2Int(3840, 2160), // 4K UHD
+                new Vector2Int(7680, 4320), // 8K UHD
+                new Vector2Int(-1, -1) // This is a Custom Resolution
+            };
+
+            // Fix and replace UI Label Text from showing as Vector2Ints in the Presets Dropdown (MUST MATCH EXACT ORDER AS ABOVE!!)
+            List<string> presetLabels = new List<string>() {
+                "VRC Thumbnail",
+                "480p",
+                "720p",
+                "1080p",
+                "1440p",
+                "4K",
+                "8K",
+                "Custom"
+            };
+            
+            // Create VisualElement for the Presets Dropdown
+            VisualElement resolutionContainer = tree.Q<VisualElement>("resolutionContainer");
+
+            // Create Presets Dropdown
+            PopupField<Vector2Int> resolutionDropdown = new PopupField<Vector2Int>("Presets", presetResolutions, 0,
+            formatListItemCallback: (Vector2Int res) => {
+                int index = presetResolutions.IndexOf(res);
+                return index >= 0 ? presetLabels[index] : "Custom";
+            },
+            formatSelectedValueCallback: (Vector2Int res) => {
+                int index = presetResolutions.IndexOf(res);
+                return index >= 0 ? presetLabels[index] : "Custom";
+            });
+            
+            // Add listeners to ensure "Custom" is auto-selected when Resolution is manually typed in
+            resWidthField.RegisterValueChangedCallback(evt => {
+                if (!presetResolutions.Any(res => res.x == evt.newValue && res.y == resHeightField.value)) {
+                    resolutionDropdown.value = new Vector2Int(-1, -1); // Set to Custom
+                }
+            });
+            resHeightField.RegisterValueChangedCallback(evt => {
+                if (!presetResolutions.Any(res => res.y == evt.newValue && res.x == resWidthField.value)) {
+                    resolutionDropdown.value = new Vector2Int(-1, -1); // Set to Custom
+                }
+            });
+            
+            // Presets Dropdown Event Handler
+            resolutionDropdown.RegisterValueChangedCallback(evt => {
+                if (evt.newValue.x == -1 && evt.newValue.y == -1) {
+                    return; // Don't update the Integer Fields if "Custom" is selected
+                }
+                resolution = evt.newValue;
+                resWidthField.value = resolution.x;
+                resHeightField.value = resolution.y;
+                UpdateResolutionInfoLabel();
+            });
+            
+            // Add Dropdown to the resolutionContainer
+            resolutionContainer.Add(resolutionDropdown);
+            
+            // END Resolution Presets Dropdown
 
             IntegerField multiplierInt = tree.Q<IntegerField>("multiplierInt");
             SliderInt multiplierSlider = tree.Q<SliderInt>("multiplierSlider");
