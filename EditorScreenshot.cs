@@ -1,4 +1,4 @@
-// EditorScreenshots by Pumkin#9524
+// EditorScreenshots by Pumkin
 // https://github.com/rurre/Editor-Screenshot
 // Based on an ancient tool somewhere on the Asset Store called Instant Screenshot by Saad Khawaja.
 
@@ -441,7 +441,7 @@ namespace Pumkin.EditorScreenshot
             int resHeight = resolution.y * resolutionMultiplier;
 
             string screenshotName = GenerateScreenshotName();
-            string screenshotPath = $"{savePath}\\{screenshotName}";
+            string screenshotPath = Path.Combine(savePath, screenshotName);
 
             string logMsg = $"Attempting to take screenshot <b>{screenshotName}</b> and save it to <b>{screenshotPath}</b> - ";
 
