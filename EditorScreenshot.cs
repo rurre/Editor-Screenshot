@@ -456,6 +456,7 @@ namespace Pumkin.EditorScreenshot
             {
                 Camera cam = TargetCamera;
                 RenderTexture rtHDR = new RenderTexture(resWidth, resHeight, 24, UnityEngine.Experimental.Rendering.DefaultFormat.HDR);
+                rtHDR.antiAliasing = 8;
                 cam.targetTexture = rtHDR;
 
                 if(useTransparentBg)
