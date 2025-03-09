@@ -36,6 +36,26 @@ namespace Pumkin.EditorScreenshot
         VisualTreeAsset uxmlTree;
         StyleSheet styleSheet;
         VisualElement tree;
+        VisualElement cameraPreview;
+        Foldout cameraPreviewFoldout;
+
+        RenderTexture CameraPreviewRT
+        {
+            get
+            {
+                if(_cameraPreviewRT == null)
+                {
+                    _cameraPreviewRT = new RenderTexture(resolution.x, resolution.y, 0, RenderTextureFormat.ARGB32);
+                    cameraPreview.style.backgroundImage = Background.FromRenderTexture(_cameraPreviewRT);
+                }
+
+                return _cameraPreviewRT;
+            }
+            set => _cameraPreviewRT = value;
+        }
+        RenderTexture _cameraPreviewRT;
+        
+        Vector2Int previewSizeMinMax = new Vector2Int(100, 600);
 
         Camera TargetCamera
         {
@@ -108,7 +128,7 @@ namespace Pumkin.EditorScreenshot
         {
             window = GetWindow<EditorScreenshot>();
             window.titleContent = new GUIContent("Screenshot");
-            window.minSize = new Vector2(335, 430);
+            window.minSize = new Vector2(335, 490);
         }
 
         void Awake()
@@ -119,6 +139,7 @@ namespace Pumkin.EditorScreenshot
         void OnDestroy()
         {
             StopFollowingCamera();
+            SetCameraPreviewEnabled(false);
             SaveSettings();
         }
 
@@ -168,6 +189,31 @@ namespace Pumkin.EditorScreenshot
 
 		void StartFollowingCamera() => EditorApplication.update += CameraToSceneCamera;
         void StopFollowingCamera() => EditorApplication.update -= CameraToSceneCamera;
+
+        void SetCameraPreviewEnabled(bool enabled)
+        {
+            if(enabled)
+            {
+                EditorApplication.update -= CameraToPreview;
+                EditorApplication.update += CameraToPreview;
+            }
+            else
+            {
+                _cameraPreviewRT = null;
+                EditorApplication.update -= CameraToPreview;
+            }
+        }
+
+        void CameraToPreview()
+        {
+            if(!TargetCamera)
+                return;
+
+            Color? color = useTransparentBg ? new Color(1, 1, 1, 0.25f) : null;
+            float? clipPlane = fixNearClip ? 0.001f : null;
+            RenderCameraToRenderTexture(TargetCamera, CameraPreviewRT, color, clipPlane);
+            Repaint();
+        }
 
         void CameraToSceneCamera()
         {
@@ -248,7 +294,7 @@ namespace Pumkin.EditorScreenshot
             {
                 resolution.x = evt.newValue;
                 UpdateResolutionInfoLabel();
-
+                CameraPreviewRT = null;
             });
             resWidthField.value = resolution.x;
 
@@ -257,12 +303,15 @@ namespace Pumkin.EditorScreenshot
             {
                 resolution.y = evt.newValue;
                 UpdateResolutionInfoLabel();
+                CameraPreviewRT = null;
             });
             resHeightField.value = resolution.y;
 
 			// Add preset Vector2Ints for each Resolution Preset
-			List<Vector2Int> presetResolutions = new List<Vector2Int>() {
+			List<Vector2Int> presetResolutions = new List<Vector2Int>
+            {
 				new Vector2Int(1200, 900), // VRC Avatar and World Thumbnail
+                new Vector2Int(256, 256), // Menu Icon
                 new Vector2Int(720, 480), // 480p SD
                 new Vector2Int(1280, 720), // 720p HD
                 new Vector2Int(1920, 1080), // 1080p FHD
@@ -273,8 +322,10 @@ namespace Pumkin.EditorScreenshot
             };
 
 			// Fix and replace UI Label Text from showing as Vector2Ints in the Presets Dropdown (MUST MATCH EXACT ORDER AS ABOVE!!)
-			List<string> presetLabels = new List<string>() {
+			List<string> presetLabels = new List<string> 
+            {
 				"VRC Thumbnail",
+                "Menu Icon",
 				"480p",
 				"720p",
 				"1080p",
@@ -394,6 +445,19 @@ namespace Pumkin.EditorScreenshot
             VisualElement githubButton = tree.Q("githubButton");
             githubButton.style.backgroundImage = new StyleBackground(githubIcon);
             githubButton.RegisterCallback<MouseUpEvent>(evt => Application.OpenURL(githubLink));
+            
+            // Preview
+            cameraPreviewFoldout = tree.Q("cameraPreviewContainer").Q<Foldout>("previewFoldout");
+            cameraPreview = tree.Q("previewRT");
+            
+            var previewSizeSlider = tree.Q<Slider>("previewSize");
+            previewSizeSlider.RegisterValueChangedCallback(evt =>
+            {
+                cameraPreview.style.height = Mathf.Lerp(previewSizeMinMax.x, previewSizeMinMax.y, evt.newValue);
+            });
+            cameraPreview.style.height = Mathf.Lerp(previewSizeMinMax.x, previewSizeMinMax.y, previewSizeSlider.value);
+            cameraPreviewFoldout.RegisterValueChangedCallback(evt => SetCameraPreviewEnabled(evt.newValue));
+            SetCameraPreviewEnabled(cameraPreviewFoldout.value);
 
             UpdateResolutionInfoLabel();
         }
@@ -429,6 +493,35 @@ namespace Pumkin.EditorScreenshot
             resolutionInfoLabel.text = string.Format(resolutionInfoText, resolution.x * resolutionMultiplier, resolution.y * resolutionMultiplier);
         }
 
+        void RenderCameraToRenderTexture(Camera camera, RenderTexture renderTexture, Color? backgroundColorOverride = null, float? nearClipValueOverride = null)
+        {
+            RenderTexture oldRt = camera.targetTexture;
+            Color oldColor = camera.backgroundColor;
+            CameraClearFlags oldFlags = camera.clearFlags;
+            float oldNearClip = camera.nearClipPlane;
+            RenderTexture oldActiveRT = RenderTexture.active;
+
+            if(backgroundColorOverride != null)
+            {
+                camera.backgroundColor = backgroundColorOverride.Value;
+                camera.clearFlags = CameraClearFlags.Color;
+            }
+
+            if(nearClipValueOverride != null)
+                camera.nearClipPlane = nearClipValueOverride.Value;
+            
+            camera.targetTexture = renderTexture;
+            camera.Render();
+
+            RenderTexture.active = null;
+
+            camera.targetTexture = oldRt;
+            camera.backgroundColor = oldColor;
+            camera.clearFlags = oldFlags;
+            camera.nearClipPlane = oldNearClip;
+            camera.targetTexture = oldActiveRT;
+        }
+
         void TakeScreenshot()
         {
             if(!TargetCamera)
@@ -445,30 +538,16 @@ namespace Pumkin.EditorScreenshot
 
             string logMsg = $"Attempting to take screenshot <b>{screenshotName}</b> and save it to <b>{screenshotPath}</b> - ";
 
-            RenderTexture oldRt = TargetCamera.targetTexture;
-            Color oldColor = TargetCamera.backgroundColor;
-            CameraClearFlags oldFlags = TargetCamera.clearFlags;
-            float oldNearClip = TargetCamera.nearClipPlane;
-            RenderTexture oldActiveRT = RenderTexture.active;
             bool success;
-
             try
             {
                 Camera cam = TargetCamera;
+
                 RenderTexture rtHDR = new RenderTexture(resWidth, resHeight, 24, UnityEngine.Experimental.Rendering.DefaultFormat.HDR);
                 rtHDR.antiAliasing = 8;
                 cam.targetTexture = rtHDR;
-
-                if(useTransparentBg)
-                {
-                    cam.backgroundColor = new Color(0, 0, 0, 0);
-                    cam.clearFlags = CameraClearFlags.Color;
-                }
-
-                if(fixNearClip)
-                    cam.nearClipPlane = 0.001f;
-
-                cam.Render();
+            
+                RenderCameraToRenderTexture(TargetCamera, rtHDR, new Color(0, 0, 0, 0), 0.001f);
 
                 RenderTexture rtLDR = new RenderTexture(resWidth, resHeight, 24, UnityEngine.Experimental.Rendering.DefaultFormat.LDR);
                 Graphics.Blit(rtHDR, rtLDR);
@@ -476,9 +555,6 @@ namespace Pumkin.EditorScreenshot
 
                 Texture2D screenShot = new Texture2D(resWidth, resHeight, useTransparentBg ? TextureFormat.ARGB32 : TextureFormat.RGB24, false);
                 screenShot.ReadPixels(new Rect(0, 0, resWidth, resHeight), 0, 0);
-
-                cam.targetTexture = null;
-                RenderTexture.active = null;
 
                 if(!Directory.Exists(savePath))
                     Directory.CreateDirectory(savePath);
@@ -496,19 +572,6 @@ namespace Pumkin.EditorScreenshot
             {
                 logMsg += $"<b>Failed:</b> {ex.Message}";
                 success = false;
-            }
-            finally
-            {
-                TargetCamera.targetTexture = oldRt;
-                RenderTexture.active = oldActiveRT;
-                if(useTransparentBg)
-                {
-                    TargetCamera.clearFlags = oldFlags;
-                    TargetCamera.backgroundColor = oldColor;
-                }
-
-                if(fixNearClip)
-                    TargetCamera.nearClipPlane = oldNearClip;
             }
             if(success)
                 Debug.Log(FormatLogMessage(logMsg));
