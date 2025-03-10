@@ -12,6 +12,7 @@ using UnityEditorInternal;
 using UnityEngine;
 using UnityEngine.UIElements;
 using static Pumkin.EditorScreenshot.EditorScreenshotUtility;
+using Color = UnityEngine.Color;
 
 namespace Pumkin.EditorScreenshot
 {
@@ -39,23 +40,52 @@ namespace Pumkin.EditorScreenshot
         VisualElement cameraPreview;
         Foldout cameraPreviewFoldout;
 
+        bool issuedPreviewResolutionWarning = false;
+
         RenderTexture CameraPreviewRT
         {
             get
             {
                 if(_cameraPreviewRT == null)
                 {
-                    _cameraPreviewRT = new RenderTexture(resolution.x, resolution.y, 0, RenderTextureFormat.ARGB32);
+                    // Clamp preview to 4K
+                    const int _4kWidth = 3840;
+                    const int _4kHeight = 2160;
+                    int resX = resolution.x * resolutionMultiplier;
+                    int resY = resolution.y * resolutionMultiplier;
+
+                    if(ClampResolution(ref resX, ref resY, _4kWidth, _4kHeight) && !issuedPreviewResolutionWarning)
+                    {
+                        issuedPreviewResolutionWarning = true;
+                        EditorScreenshotLogger.LogWarning($"Preview resolution gets clamped to 4k resolution ({_4kWidth}x{_4kHeight}).");
+                    }
+
+                    _cameraPreviewRT = new RenderTexture(resX, resY, 0, RenderTextureFormat.ARGB32)
+                    {
+                        antiAliasing = antiAliasingValue
+                    };
                     cameraPreview.style.backgroundImage = Background.FromRenderTexture(_cameraPreviewRT);
                 }
 
                 return _cameraPreviewRT;
             }
-            set => _cameraPreviewRT = value;
+            set
+            {
+                if(value == null && _cameraPreviewRT != null)
+                {
+                    if(EditorApplication.isPlaying)
+                        Destroy(_cameraPreviewRT);
+                    else
+                        DestroyImmediate(_cameraPreviewRT);
+                }
+                _cameraPreviewRT = value;
+            }
         }
         RenderTexture _cameraPreviewRT;
         
-        Vector2Int previewSizeMinMax = new Vector2Int(100, 600);
+        Vector2Int previewSizeMinMax = new Vector2Int(100, 700);
+
+        int antiAliasingValue;
 
         Camera TargetCamera
         {
@@ -158,7 +188,7 @@ namespace Pumkin.EditorScreenshot
             }
             catch(Exception ex)
             {
-                Debug.LogWarning(FormatLogMessage("Failed to load window settings:"));
+                EditorScreenshotLogger.LogWarning("Failed to load window settings:");
                 Debug.LogException(ex);
             }
 
@@ -182,7 +212,7 @@ namespace Pumkin.EditorScreenshot
             }
             catch(Exception ex)
             {
-                Debug.LogError(FormatLogMessage("Failed to save window settings."));
+                EditorScreenshotLogger.LogError("Failed to save window settings.");
                 Debug.LogException(ex);
             }
         }
@@ -209,9 +239,9 @@ namespace Pumkin.EditorScreenshot
             if(!TargetCamera)
                 return;
 
-            Color? color = useTransparentBg ? new Color(1, 1, 1, 0.25f) : null;
-            float? clipPlane = fixNearClip ? 0.001f : null;
-            RenderCameraToRenderTexture(TargetCamera, CameraPreviewRT, color, clipPlane);
+            Color? backgroundColorOverride = useTransparentBg ? new Color(1, 1, 1, 0.25f) : null;
+            float? clipPlaneOverride = fixNearClip ? 0.001f : null;
+            RenderCameraToRenderTexture(TargetCamera, CameraPreviewRT, backgroundColorOverride, clipPlaneOverride);
             Repaint();
         }
 
@@ -292,18 +322,36 @@ namespace Pumkin.EditorScreenshot
             IntegerField resWidthField = tree.Q<IntegerField>("resWidthField");
             resWidthField.RegisterCallback<ChangeEvent<int>>(evt =>
             {
-                resolution.x = evt.newValue;
+                int newValue = evt.newValue;
+                if(evt.newValue == 0)
+                {
+                    newValue = Mathf.Max(1, evt.newValue);
+                    resWidthField.SetValueWithoutNotify(newValue);
+                }
+
+                resolution.x = newValue;
+                if(resolution.x != evt.previousValue)
+                    CameraPreviewRT = null;
+                
                 UpdateResolutionInfoLabel();
-                CameraPreviewRT = null;
             });
             resWidthField.value = resolution.x;
 
             IntegerField resHeightField = tree.Q<IntegerField>("resHeightField");
             resHeightField.RegisterCallback<ChangeEvent<int>>(evt =>
             {
-                resolution.y = evt.newValue;
+                int newValue = evt.newValue;
+                if(evt.newValue == 0)
+                {
+                    newValue = Mathf.Max(1, evt.newValue);
+                    resHeightField.SetValueWithoutNotify(newValue);
+                }
+
+                resolution.y = newValue;
+                if(resolution.y != evt.previousValue)
+                    CameraPreviewRT = null;
+                
                 UpdateResolutionInfoLabel();
-                CameraPreviewRT = null;
             });
             resHeightField.value = resolution.y;
 
@@ -392,6 +440,9 @@ namespace Pumkin.EditorScreenshot
                 if(evt.newValue > 10)
                     multiplierInt.SetValueWithoutNotify(value);
 
+                if(evt.newValue != evt.previousValue)
+                    CameraPreviewRT = null;
+                
                 UpdateResolutionInfoLabel();
             });
 
@@ -401,10 +452,27 @@ namespace Pumkin.EditorScreenshot
                 resolutionMultiplier = value;
                 multiplierInt.SetValueWithoutNotify(value);
 
+                if(evt.newValue != evt.previousValue)
+                    CameraPreviewRT = null;
+                
                 UpdateResolutionInfoLabel();
             });
             multiplierInt.value = resolutionMultiplier;
             multiplierSlider.value = multiplierInt.value;
+            
+            var antiAliasingDropdown = tree.Q<DropdownField>("antiAliasingDropdown");
+            var antiAliasingChoices = new Dictionary<string, int> { { "x1", 1 }, { "x2", 2 }, { "x4", 4 }, { "x8", 8 } };
+            antiAliasingDropdown.choices = antiAliasingChoices.Keys.ToList();
+            if(antiAliasingDropdown.index == -1)
+                antiAliasingDropdown.index = antiAliasingDropdown.choices.Count - 1;
+            antiAliasingDropdown.RegisterValueChangedCallback(evt =>
+            {
+                antiAliasingValue = antiAliasingChoices.TryGetValue(evt.newValue, out int newValue) ? newValue : antiAliasingChoices.Values.Last();
+
+                if(evt.newValue != evt.previousValue)
+                    CameraPreviewRT = null;
+            });
+            antiAliasingValue = antiAliasingChoices.TryGetValue(antiAliasingDropdown.value, out int value) ? value : antiAliasingChoices.Values.Last();
 
             Toggle transparentBackgroundToggle = tree.Q<Toggle>("transparentBackgroundToggle");
             transparentBackgroundToggle.RegisterCallback<ChangeEvent<bool>>(evt => useTransparentBg = evt.newValue);
@@ -466,7 +534,7 @@ namespace Pumkin.EditorScreenshot
         {
             if(!SceneView.lastActiveSceneView && !SceneView.lastActiveSceneView.camera)
             {
-                Debug.LogError(FormatLogMessage("Failed to create camera from scene view."));
+                EditorScreenshotLogger.LogError("Failed to create camera from scene view.");
                 return;
             }
 
@@ -543,11 +611,15 @@ namespace Pumkin.EditorScreenshot
             {
                 Camera cam = TargetCamera;
 
-                RenderTexture rtHDR = new RenderTexture(resWidth, resHeight, 24, UnityEngine.Experimental.Rendering.DefaultFormat.HDR);
-                rtHDR.antiAliasing = 8;
+                RenderTexture rtHDR = new RenderTexture(resWidth, resHeight, 24, UnityEngine.Experimental.Rendering.DefaultFormat.HDR)
+                {
+                    antiAliasing = antiAliasingValue
+                };
                 cam.targetTexture = rtHDR;
-            
-                RenderCameraToRenderTexture(TargetCamera, rtHDR, new Color(0, 0, 0, 0), 0.001f);
+
+                Color? backgroundColorOverride = useTransparentBg ? new Color(1, 1, 1, 0.25f) : null;
+                float? clipPlaneOverride = fixNearClip ? 0.001f : null;
+                RenderCameraToRenderTexture(TargetCamera, rtHDR, backgroundColorOverride, clipPlaneOverride);
 
                 RenderTexture rtLDR = new RenderTexture(resWidth, resHeight, 24, UnityEngine.Experimental.Rendering.DefaultFormat.LDR);
                 Graphics.Blit(rtHDR, rtLDR);
@@ -574,9 +646,9 @@ namespace Pumkin.EditorScreenshot
                 success = false;
             }
             if(success)
-                Debug.Log(FormatLogMessage(logMsg));
+                EditorScreenshotLogger.Log(logMsg);
             else
-                Debug.LogError(FormatLogMessage(logMsg));
+                EditorScreenshotLogger.LogError(logMsg);
         }
 
         void OpenSaveFolder()
@@ -584,19 +656,19 @@ namespace Pumkin.EditorScreenshot
             if(Directory.Exists(savePath))
                 Application.OpenURL("file:///" + savePath);
             else if(string.IsNullOrWhiteSpace(savePath))
-                Debug.LogWarning(FormatLogMessage("The save path is empty."));
+                EditorScreenshotLogger.LogWarning("The save path is empty.");
             else
-                Debug.LogWarning(FormatLogMessage("Invalid save folder. Can't open " + savePath));
+                EditorScreenshotLogger.LogWarning("Invalid save folder. Can't open {savePath}");
         }
 
         void OpenLastScreenshot()
         {
             if(string.IsNullOrWhiteSpace(lastScreenshotPath))
-                Debug.LogWarning(FormatLogMessage("No screenshots have been taken."));
+                EditorScreenshotLogger.LogWarning("No screenshots have been taken.");
             else if(File.Exists(lastScreenshotPath))
                 Application.OpenURL("file:///" + lastScreenshotPath);
             else
-                Debug.LogWarning(FormatLogMessage("Screenshot doesn't exist at path: " + lastScreenshotPath));
+                EditorScreenshotLogger.Log($"Screenshot doesn't exist at path: {lastScreenshotPath}");
         }
 
         string GenerateScreenshotName()
