@@ -31,15 +31,16 @@
                 <ui:VisualElement name="resolutionFieldContainer" style="margin-top: 1px; flex-direction: row; margin-left: 0; margin-right: 3px; margin-bottom: 1px;">
                     <ui:Label text="Resolution" class="unity-base-field__label" />
                     <ui:VisualElement class="unity_base_field__input" style="flex-direction: row; flex-grow: 1; flex-shrink: 0; white-space: normal;">
-                        <uie:IntegerField value="1920" name="resWidthField" tooltip="Resolution Width to use." style="width: 0; flex-grow: 1; margin-left: 0; margin-right: 0;" />
+                        <uie:IntegerField value="1920" name="resWidthField" tooltip="Resolution Width to use." is-delayed="true" style="width: 0; flex-grow: 1; margin-left: 0; margin-right: 0;" />
                         <ui:Label text="x" style="justify-content: center; align-items: stretch; -unity-text-align: middle-center; margin-left: 2px; margin-right: 2px;" />
-                        <uie:IntegerField value="1080" name="resHeightField" tooltip="Resolution Height to use." style="width: 0; flex-grow: 1; margin-right: 0; margin-left: 0;" />
+                        <uie:IntegerField value="1080" name="resHeightField" tooltip="Resolution Height to use." is-delayed="true" style="width: 0; flex-grow: 1; margin-right: 0; margin-left: 0;" />
                     </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:VisualElement name="resolutionScaleContainer" style="flex-direction: row; margin-left: 0; margin-right: 3px; margin-top: 1px; margin-bottom: 1px;">
                     <ui:SliderInt picking-mode="Ignore" value="1" high-value="10" low-value="1" name="multiplierSlider" label="Multiplier" tooltip="Resolution multiplier." style="flex-grow: 1; margin-left: 0; margin-right: 0; flex-direction: row; -unity-text-align: upper-left; margin-bottom: 1px; margin-top: 0; flex-shrink: 0;" />
                     <uie:IntegerField value="1" name="multiplierInt" tooltip="Resolution multiplier." style="width: 22px; -unity-text-align: upper-center; -unity-font-style: normal; margin-right: 0;" />
                 </ui:VisualElement>
+                <ui:DropdownField label="Anti Aliasing" name="antiAliasingDropdown" style="margin-left: 0;" />
             </ui:VisualElement>
             <ui:VisualElement name="optionsContainer" class="container section">
                 <ui:Toggle label="Transparent Background" name="transparentBackgroundToggle" tooltip="Give screenshots a transparent background." value="true" style="margin-left: 0;" />
@@ -56,8 +57,8 @@
                 </ui:VisualElement>
             </ui:VisualElement>
             <ui:VisualElement name="cameraPreviewContainer" class="container section" style="flex-grow: 1; flex-shrink: 1;">
-                <ui:Foldout text="Camera Preview" name="previewFoldout" value="false" style="flex-grow: 1; margin-top: 6px;">
-                    <ui:Slider label="Preview Size" high-value="1" name="previewSize" direction="Horizontal" style="margin-bottom: 4px;" />
+                <ui:Foldout text="Camera Preview" name="previewFoldout" value="false" view-data-key="pumkins-editor-screenshot_preview-foldout" style="flex-grow: 1; margin-top: 6px;">
+                    <ui:Slider label="Preview Size" high-value="1" name="previewSize" direction="Horizontal" view-data-key="pumkins-editor-screenshot_preview-slider" style="margin-bottom: 4px;" />
                     <ui:VisualElement style="flex-grow: 1; padding-right: 12px;">
                         <ui:VisualElement name="previewRT" style="-unity-background-scale-mode: scale-to-fit; -unity-background-image-tint-color: rgb(255, 255, 255); width: 100%; height: 400px;" />
                     </ui:VisualElement>
