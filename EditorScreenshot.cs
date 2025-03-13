@@ -567,7 +567,6 @@ namespace Pumkin.EditorScreenshot
             Color oldColor = camera.backgroundColor;
             CameraClearFlags oldFlags = camera.clearFlags;
             float oldNearClip = camera.nearClipPlane;
-            RenderTexture oldActiveRT = RenderTexture.active;
 
             if(backgroundColorOverride != null)
             {
@@ -581,13 +580,10 @@ namespace Pumkin.EditorScreenshot
             camera.targetTexture = renderTexture;
             camera.Render();
 
-            RenderTexture.active = null;
-
             camera.targetTexture = oldRt;
             camera.backgroundColor = oldColor;
             camera.clearFlags = oldFlags;
             camera.nearClipPlane = oldNearClip;
-            camera.targetTexture = oldActiveRT;
         }
 
         void TakeScreenshot()
@@ -615,15 +611,18 @@ namespace Pumkin.EditorScreenshot
                 {
                     antiAliasing = antiAliasingValue
                 };
+                RenderTexture oldCamRT = cam.targetTexture;
                 cam.targetTexture = rtHDR;
 
-                Color? backgroundColorOverride = useTransparentBg ? new Color(1, 1, 1, 0.25f) : null;
+                Color? backgroundColorOverride = useTransparentBg ? new Color(1, 1, 1, 0) : null;
                 float? clipPlaneOverride = fixNearClip ? 0.001f : null;
                 RenderCameraToRenderTexture(TargetCamera, rtHDR, backgroundColorOverride, clipPlaneOverride);
 
                 RenderTexture rtLDR = new RenderTexture(resWidth, resHeight, 24, UnityEngine.Experimental.Rendering.DefaultFormat.LDR);
                 Graphics.Blit(rtHDR, rtLDR);
                 RenderTexture.active = rtLDR;
+                
+                cam.targetTexture = oldCamRT;
 
                 Texture2D screenShot = new Texture2D(resWidth, resHeight, useTransparentBg ? TextureFormat.ARGB32 : TextureFormat.RGB24, false);
                 screenShot.ReadPixels(new Rect(0, 0, resWidth, resHeight), 0, 0);
