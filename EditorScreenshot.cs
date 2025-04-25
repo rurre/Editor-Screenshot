@@ -83,7 +83,8 @@ namespace Pumkin.EditorScreenshot
         }
         RenderTexture _cameraPreviewRT;
         
-        Vector2Int previewSizeMinMax = new Vector2Int(100, 700);
+        readonly Vector2Int previewSizeMinMax = new Vector2Int(100, 700);
+        readonly Color transparentColor = new Color(0, 0, 0, 0);
 
         int antiAliasingValue;
 
@@ -614,7 +615,7 @@ namespace Pumkin.EditorScreenshot
                 RenderTexture oldCamRT = cam.targetTexture;
                 cam.targetTexture = rtHDR;
 
-                Color? backgroundColorOverride = useTransparentBg ? new Color(1, 1, 1, 0) : null;
+                Color? backgroundColorOverride = useTransparentBg ? transparentColor : null;
                 float? clipPlaneOverride = fixNearClip ? 0.001f : null;
                 RenderCameraToRenderTexture(TargetCamera, rtHDR, backgroundColorOverride, clipPlaneOverride);
 
