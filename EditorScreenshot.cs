@@ -580,6 +580,7 @@ namespace Pumkin.EditorScreenshot
             
             camera.targetTexture = renderTexture;
             camera.Render();
+            
 
             camera.targetTexture = oldRt;
             camera.backgroundColor = oldColor;
@@ -622,15 +623,32 @@ namespace Pumkin.EditorScreenshot
                 RenderTexture rtLDR = new RenderTexture(resWidth, resHeight, 24, UnityEngine.Experimental.Rendering.DefaultFormat.LDR);
                 Graphics.Blit(rtHDR, rtLDR);
                 RenderTexture.active = rtLDR;
-                
-                cam.targetTexture = oldCamRT;
 
-                Texture2D screenShot = new Texture2D(resWidth, resHeight, useTransparentBg ? TextureFormat.ARGB32 : TextureFormat.RGB24, false);
+                TextureFormat textureFormat = useTransparentBg ? TextureFormat.ARGB32 : TextureFormat.RGB24;
+                Texture2D screenShot = new Texture2D(resWidth, resHeight, textureFormat, false);
                 screenShot.ReadPixels(new Rect(0, 0, resWidth, resHeight), 0, 0);
+                
+                if(useTransparentBg)
+                {
+                    var pixels = screenShot.GetPixels();
+                    for(int i = 0; i < pixels.Length; i++)
+                    {
+                        float alpha = pixels[i].a;
+                        
+                        if(alpha == 0f)
+                            continue;
+                        pixels[i].r /= alpha;
+                        pixels[i].g /= alpha;
+                        pixels[i].b /= alpha;
+                    }
+                    screenShot.SetPixels(pixels);
+                }
+
+                cam.targetTexture = oldCamRT;
 
                 if(!Directory.Exists(savePath))
                     Directory.CreateDirectory(savePath);
-
+                
                 File.WriteAllBytes(screenshotPath, screenShot.EncodeToPNG());
                 lastScreenshotPath = screenshotPath;
 

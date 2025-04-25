@@ -1,7 +1,7 @@
 {
   "name": "io.github.rurre.editor-screenshot",
   "displayName": "Pumkin's Editor Screenshot",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "An editor tool for taking transparent screenshots in the editor.",
   "url": "https://github.com/rurre/Editor-Screenshot/",
   "unity": "2019.4",
