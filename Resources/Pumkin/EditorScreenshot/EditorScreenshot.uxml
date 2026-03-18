@@ -5,7 +5,8 @@
             <ui:Label text="Pumkin&apos;s Editor Screenshot" name="mainTitle" style="opacity: 1; flex-grow: 0; flex-direction: column; flex-wrap: nowrap; flex-shrink: 0; padding-left: 0; padding-right: 0; padding-top: 0; -unity-text-align: middle-left; color: rgb(255, 0, 162); font-size: 16px; white-space: normal; -unity-font-style: normal;" />
             <ui:Label text="vX.X" name="versionLabel" style="flex-wrap: wrap; flex-grow: 0; flex-basis: auto; flex-shrink: 0; -unity-text-align: middle-right; padding-left: 5px;" />
             <ui:VisualElement name="buttonLinks" style="width: auto; height: auto; flex-direction: row-reverse; flex-grow: 1;">
-                <ui:VisualElement name="donateButton" tooltip="Show support by giving me money! &lt;3" class="linkButton" />
+                <ui:VisualElement name="patreonButton" tooltip="Open the Github page for this tool." class="linkButton" />
+                <ui:VisualElement name="kofiButton" tooltip="Show support by giving me money! &lt;3" class="linkButton" />
                 <ui:VisualElement name="githubButton" tooltip="Open the Github page for this tool." class="linkButton" />
             </ui:VisualElement>
         </ui:VisualElement>
@@ -66,7 +67,7 @@
             </ui:VisualElement>
         </ui:ScrollView>
         <ui:VisualElement name="screenshotButtonsContainer" class="section" style="flex-shrink: 0;">
-            <ui:Label text="Resolution label" name="resolutionInfoLabel" style="flex-wrap: wrap; -unity-font-style: bold; -unity-text-align: upper-center;" />
+            <ui:HelpBox text="Resolution label" name="resolutionInfo" message-type="Info" class="resolutionHelpBox" style="flex-wrap: wrap; -unity-font-style: bold; -unity-text-align: upper-center; border-left-color: rgba(26, 26, 26, 0); border-right-color: rgba(26, 26, 26, 0); border-top-color: rgba(26, 26, 26, 0); border-bottom-color: rgba(26, 26, 26, 0); background-color: rgba(63, 63, 63, 0);" />
             <ui:Button text="Take Screenshot" name="screenshotButton" tooltip="Take a screenshot!" style="height: 45px; margin-left: 0; margin-right: 0;" />
             <ui:VisualElement style="flex-direction: row; align-items: center; justify-content: center; flex-grow: 1; height: auto;">
                 <ui:Button text="Open Last Screenshot" name="openLastButton" tooltip="Opens the last screenshot taken this session." style="flex-grow: 1; height: 30px; width: 45%; margin-right: 1px; margin-left: 0;" />

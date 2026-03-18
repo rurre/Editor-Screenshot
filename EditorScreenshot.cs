@@ -27,13 +27,15 @@ namespace Pumkin.EditorScreenshot
 
         string version = "Unknown";
         const string defaultScreenshotName = "Screenshot_{0}x{1}.png";
-        const string resolutionInfoText = "Final screenshot resolution will be {0}x{1}";
+        const string resolutionInfoText = "Final screenshot resolution will be <b>{0}</b>x<b>{1}</b>";
         const string kofiLink = "https://ko-fi.com/notpumkin";
+        const string patreonLink = "https://www.patreon.com/c/notPumkin";
         const string githubLink = "https://github.com/rurre/Editor-Screenshot";
         const string editorPrefsSettingsKey = "PumkinsEditorScreenshotSettings";
 
         Texture2D githubIcon;
         Texture2D kofiIcon;
+        Texture2D patreonIcon;
         VisualTreeAsset uxmlTree;
         StyleSheet styleSheet;
         VisualElement tree;
@@ -134,11 +136,24 @@ namespace Pumkin.EditorScreenshot
 
         [SerializeField] bool selectCreatedCamera = false;
 
-        Label resolutionInfoLabel;
+        HelpBox resolutionInfoBox;
         ObjectField selectedCameraField;
         EnumField cameraTypeEnumField;
 
 		static EditorWindow window;
+        
+        Dictionary<Vector2Int, string> ResolutionPresets = new Dictionary<Vector2Int, string>
+        {
+            { new Vector2Int(1200, 900), "VRC Thumbnail" },
+            { new Vector2Int(256, 256), "Menu Icon" },
+            { new Vector2Int(720, 480), "480p" },
+            { new Vector2Int(1280, 720), "720p" },
+            { new Vector2Int(1920, 1080), "1080p" },
+            { new Vector2Int(2560, 1440), "1440p" },
+            { new Vector2Int(3840, 2160), "4K" },
+            { new Vector2Int(7680, 4320), "8K" },
+            { new Vector2Int(-1, -1), "Custom" },
+        };
 
         string ProjectPath
         {
@@ -147,7 +162,7 @@ namespace Pumkin.EditorScreenshot
                 if(string.IsNullOrWhiteSpace(_projectPath))
                 {
                     string dataPath = Application.dataPath;
-                    _projectPath = dataPath.Substring(0, dataPath.LastIndexOf("Assets"));
+                    _projectPath = dataPath.Substring(0, dataPath.LastIndexOf("Assets", StringComparison.Ordinal));
                 }
                 return _projectPath;
             }
@@ -164,6 +179,8 @@ namespace Pumkin.EditorScreenshot
 
         void Awake()
         {
+            EditorApplication.quitting -= SaveSettings;
+            EditorApplication.quitting += SaveSettings;
 			LoadSettings();
         }
 
@@ -262,7 +279,7 @@ namespace Pumkin.EditorScreenshot
             tree.styleSheets.Add(styleSheet);
             rootVisualElement.Add(tree);
 
-            resolutionInfoLabel = tree.Q<Label>("resolutionInfoLabel");
+            resolutionInfoBox = tree.Q<HelpBox>("resolutionInfo");
             tree.Q<Label>("versionLabel").text = $"v{version}";
 
             VisualElement gameCameraContainer = tree.Query<VisualElement>("gameCameraContainer");
@@ -356,65 +373,21 @@ namespace Pumkin.EditorScreenshot
             });
             resHeightField.value = resolution.y;
 
-			// Add preset Vector2Ints for each Resolution Preset
-			List<Vector2Int> presetResolutions = new List<Vector2Int>
-            {
-				new Vector2Int(1200, 900), // VRC Avatar and World Thumbnail
-                new Vector2Int(256, 256), // Menu Icon
-                new Vector2Int(720, 480), // 480p SD
-                new Vector2Int(1280, 720), // 720p HD
-                new Vector2Int(1920, 1080), // 1080p FHD
-                new Vector2Int(2560, 1440), // 1440p QHD
-                new Vector2Int(3840, 2160), // 4K UHD
-                new Vector2Int(7680, 4320), // 8K UHD
-                new Vector2Int(-1, -1) // This is a Custom Resolution
-            };
-
-			// Fix and replace UI Label Text from showing as Vector2Ints in the Presets Dropdown (MUST MATCH EXACT ORDER AS ABOVE!!)
-			List<string> presetLabels = new List<string> 
-            {
-				"VRC Thumbnail",
-                "Menu Icon",
-				"480p",
-				"720p",
-				"1080p",
-				"1440p",
-				"4K",
-				"8K",
-				"Custom"
-			};
-
 			// Create VisualElement for the Presets Dropdown
 			VisualElement resolutionFieldContainer = tree.Q<VisualElement>("resolutionFieldContainer");
 
 			// Create Presets Dropdown
-			PopupField<Vector2Int> resolutionDropdown = new PopupField<Vector2Int>("", presetResolutions, 0,
-			formatListItemCallback: (Vector2Int res) =>
-			{
-				int index = presetResolutions.IndexOf(res);
-				return index >= 0 ? presetLabels[index] : "Custom";
-			},
-			formatSelectedValueCallback: (Vector2Int res) =>
-			{
-				int index = presetResolutions.IndexOf(res);
-				return index >= 0 ? presetLabels[index] : "Custom";
-			});
+			PopupField<Vector2Int> resolutionDropdown = new PopupField<Vector2Int>(ResolutionPresets.Keys.ToList(), 0,
+                formatListItemCallback: (Vector2Int res) => ResolutionPresets.GetValueOrDefault(res, "Custom"),
+			    formatSelectedValueCallback: (Vector2Int res) => ResolutionPresets.GetValueOrDefault(res, "Custom"));
 
 			resolutionDropdown.AddToClassList("icondropdown");
 
 			// Add listeners to ensure "Custom" is auto-selected when Resolution is manually typed in
-			resWidthField.RegisterValueChangedCallback(evt =>
-			{
-				if (!presetResolutions.Any(res => res.x == evt.newValue && res.y == resHeightField.value))
-					resolutionDropdown.value = new Vector2Int(-1, -1); // Set to Custom
-			});
-			resHeightField.RegisterValueChangedCallback(evt =>
-			{
-				if (!presetResolutions.Any(res => res.y == evt.newValue && res.x == resWidthField.value))
-					resolutionDropdown.value = new Vector2Int(-1, -1); // Set to Custom
-			});
+            resWidthField.RegisterValueChangedCallback(_SetResolutionPresetFromOnManualInput);
+            resHeightField.RegisterValueChangedCallback(_SetResolutionPresetFromOnManualInput);
 
-			// Presets Dropdown Event Handler
+            // Presets Dropdown Event Handler
 			resolutionDropdown.RegisterValueChangedCallback(evt =>
 			{
 				if (evt.newValue.x == -1 && evt.newValue.y == -1)
@@ -506,9 +479,14 @@ namespace Pumkin.EditorScreenshot
             tree.Q("openFolderButton").RegisterCallback<MouseUpEvent>(evt => OpenSaveFolder());
 
             kofiIcon = Resources.Load<Texture2D>("Pumkin/EditorScreenshot/logo_kofi");
-            VisualElement donateButton = tree.Q("donateButton");
-            donateButton.style.backgroundImage = new StyleBackground(kofiIcon);
-            donateButton.RegisterCallback<MouseUpEvent>(evt => Application.OpenURL(kofiLink));
+            VisualElement kofiButton = tree.Q("kofiButton");
+            kofiButton.style.backgroundImage = new StyleBackground(kofiIcon);
+            kofiButton.RegisterCallback<MouseUpEvent>(evt => Application.OpenURL(kofiLink));
+            
+            patreonIcon = Resources.Load<Texture2D>("Pumkin/EditorScreenshot/logo_patreon");
+            VisualElement patreonButton = tree.Q("patreonButton");
+            patreonButton.style.backgroundImage = new StyleBackground(patreonIcon);
+            patreonButton.RegisterCallback<MouseUpEvent>(evt => Application.OpenURL(patreonLink));
 
             githubIcon = Resources.Load<Texture2D>("Pumkin/EditorScreenshot/logo_github");
             VisualElement githubButton = tree.Q("githubButton");
@@ -529,6 +507,13 @@ namespace Pumkin.EditorScreenshot
             SetCameraPreviewEnabled(cameraPreviewFoldout.value);
 
             UpdateResolutionInfoLabel();
+
+            void _SetResolutionPresetFromOnManualInput(ChangeEvent<int> _)
+            {
+                Vector2Int currentValue = new Vector2Int(resWidthField.value, resHeightField.value);
+                Vector2Int valueOrDefault = ResolutionPresets.ContainsKey(currentValue) ? currentValue : new Vector2Int(-1, -1);
+                resolutionDropdown.SetValueWithoutNotify(valueOrDefault);
+            }
         }
 
         void CreateCameraFromSceneView()
@@ -559,7 +544,7 @@ namespace Pumkin.EditorScreenshot
 
         void UpdateResolutionInfoLabel()
         {
-            resolutionInfoLabel.text = string.Format(resolutionInfoText, resolution.x * resolutionMultiplier, resolution.y * resolutionMultiplier);
+            resolutionInfoBox.text = string.Format(resolutionInfoText, resolution.x * resolutionMultiplier, resolution.y * resolutionMultiplier);
         }
 
         void RenderCameraToRenderTexture(Camera camera, RenderTexture renderTexture, Color? backgroundColorOverride = null, float? nearClipValueOverride = null)

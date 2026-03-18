@@ -37,3 +37,14 @@
     -unity-background-scale-mode: stretch-to-fill;
     -unity-background-image-tint-color: rgb(255, 255, 255);
 }
+
+.resolutionHelpBox {
+    flex-direction: row;
+}
+
+.resolutionHelpBox > Label {
+    font-size: 15px;
+    -unity-text-align: upper-center;
+    -unity-font-style: normal;
+    flex-grow: 1;
+}
