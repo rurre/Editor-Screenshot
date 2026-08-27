@@ -85,6 +85,10 @@ namespace Pumkin.EditorScreenshot
         }
         RenderTexture _cameraPreviewRT;
         
+        RenderTexture _hdrRT;
+        RenderTexture _ldrRT;
+        Texture2D _screenshot;
+        
         readonly Vector2Int previewSizeMinMax = new Vector2Int(100, 700);
         readonly Color transparentColor = new Color(0, 0, 0, 0);
 
@@ -188,6 +192,7 @@ namespace Pumkin.EditorScreenshot
         {
             StopFollowingCamera();
             SetCameraPreviewEnabled(false);
+            CleanupTextures();
             SaveSettings();
         }
 
@@ -247,6 +252,8 @@ namespace Pumkin.EditorScreenshot
             }
             else
             {
+                if(_cameraPreviewRT)
+                    _cameraPreviewRT.Release();
                 _cameraPreviewRT = null;
                 EditorApplication.update -= CameraToPreview;
             }
@@ -589,52 +596,55 @@ namespace Pumkin.EditorScreenshot
 
             string logMsg = $"Attempting to take screenshot <b>{screenshotName}</b> and save it to <b>{screenshotPath}</b> - ";
 
+            CleanupTextures();
+            
             bool success;
             try
             {
                 Camera cam = TargetCamera;
 
-                RenderTexture rtHDR = new RenderTexture(resWidth, resHeight, 24, UnityEngine.Experimental.Rendering.DefaultFormat.HDR)
+                _hdrRT = new RenderTexture(resWidth, resHeight, 24, UnityEngine.Experimental.Rendering.DefaultFormat.HDR)
                 {
                     antiAliasing = antiAliasingValue
                 };
                 RenderTexture oldCamRT = cam.targetTexture;
-                cam.targetTexture = rtHDR;
+                cam.targetTexture = _hdrRT;
 
                 Color? backgroundColorOverride = useTransparentBg ? transparentColor : null;
                 float? clipPlaneOverride = fixNearClip ? 0.001f : null;
-                RenderCameraToRenderTexture(TargetCamera, rtHDR, backgroundColorOverride, clipPlaneOverride);
+                RenderCameraToRenderTexture(TargetCamera, _hdrRT, backgroundColorOverride, clipPlaneOverride);
 
-                RenderTexture rtLDR = new RenderTexture(resWidth, resHeight, 24, UnityEngine.Experimental.Rendering.DefaultFormat.LDR);
-                Graphics.Blit(rtHDR, rtLDR);
-                RenderTexture.active = rtLDR;
+                _ldrRT = new RenderTexture(resWidth, resHeight, 24, UnityEngine.Experimental.Rendering.DefaultFormat.LDR);
+                Graphics.Blit(_hdrRT, _ldrRT);
+                RenderTexture.active = _ldrRT;
 
                 TextureFormat textureFormat = useTransparentBg ? TextureFormat.ARGB32 : TextureFormat.RGB24;
-                Texture2D screenShot = new Texture2D(resWidth, resHeight, textureFormat, false);
-                screenShot.ReadPixels(new Rect(0, 0, resWidth, resHeight), 0, 0);
-                
+                _screenshot = new Texture2D(resWidth, resHeight, textureFormat, false);
+                _screenshot.ReadPixels(new Rect(0, 0, resWidth, resHeight), 0, 0);
+
                 if(useTransparentBg)
                 {
-                    var pixels = screenShot.GetPixels();
+                    var pixels = _screenshot.GetPixels();
                     for(int i = 0; i < pixels.Length; i++)
                     {
                         float alpha = pixels[i].a;
-                        
+
                         if(alpha == 0f)
                             continue;
                         pixels[i].r /= alpha;
                         pixels[i].g /= alpha;
                         pixels[i].b /= alpha;
                     }
-                    screenShot.SetPixels(pixels);
+
+                    _screenshot.SetPixels(pixels);
                 }
 
                 cam.targetTexture = oldCamRT;
 
                 if(!Directory.Exists(savePath))
                     Directory.CreateDirectory(savePath);
-                
-                File.WriteAllBytes(screenshotPath, screenShot.EncodeToPNG());
+
+                File.WriteAllBytes(screenshotPath, _screenshot.EncodeToPNG());
                 lastScreenshotPath = screenshotPath;
 
                 success = true;
@@ -648,10 +658,31 @@ namespace Pumkin.EditorScreenshot
                 logMsg += $"<b>Failed:</b> {ex.Message}";
                 success = false;
             }
+            finally
+            {
+                CleanupTextures();
+            }
+
             if(success)
                 EditorScreenshotLogger.Log(logMsg);
             else
                 EditorScreenshotLogger.LogError(logMsg);
+        }
+
+        void CleanupTextures()
+        {
+            if(_hdrRT)
+            {
+                _hdrRT.Release();
+                Destroy(_hdrRT);
+            }
+            if(_ldrRT)
+            {
+                _ldrRT.Release();
+                Destroy(_ldrRT);
+            }
+            if(_screenshot)
+                Destroy(_screenshot);
         }
 
         void OpenSaveFolder()
